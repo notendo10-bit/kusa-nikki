@@ -26,7 +26,6 @@ export default function Home() {
       center: { lat: 35.3005, lng: 139.1325 },
       zoom: 17,
 
-zoom: 17,
 disableDefaultUI: true,
 styles: [
   { elementType: 'geometry', stylers: [{ color: '#c8e6a0' }] },
