@@ -26,18 +26,12 @@ export default function Home() {
       center: { lat: 35.3005, lng: 139.1325 },
       zoom: 17,
       disableDefaultUI: true,
-      styles: [
-        { elementType: 'geometry', stylers: [{ color: '#c8e6a0' }] },
-        { elementType: 'labels.text.fill', stylers: [{ color: '#3d5a1e' }] },
-        { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#fff8dc' }] },
-        { featureType: 'road', elementType: 'geometry.stroke', stylers: [{ color: '#e8d5a0' }] },
-        { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#a8d8ea' }] },
-        { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#b5db8a' }] },
-        { featureType: 'landscape.natural', elementType: 'geometry', stylers: [{ color: '#d4eebc' }] },
-        { featureType: 'building', elementType: 'geometry', stylers: [{ color: '#f5e6c8' }] },
-        { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-        { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
-      ],
+styles: [
+  { elementType: 'geometry.fill', stylers: [{ color: '#e8f5d0' }] },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#ffffff' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#a8d8ea' }] },
+  { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+],
     });
 
     PINS.forEach(pin => {
