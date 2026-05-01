@@ -27,6 +27,6 @@ export async function POST(req: NextRequest) {
 
   const data = await response.json();
   const text = data.content[0].text;
-  const result = JSON.parse(text.replace(/\\\json|\\\/g, '').trim());
+  const result = JSON.parse(text.split('`')[0].trim());
   return NextResponse.json(result);
 }
