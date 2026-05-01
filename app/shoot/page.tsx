@@ -1,4 +1,4 @@
-Set-Content -Path C:\Users\noten\kusa-nikki\app\shoot\page.tsx -Encoding UTF8 -Value @'
+
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
