@@ -5,11 +5,12 @@ import { useRouter } from 'next/navigation';
 export default function Home() {
   const mapRef = useRef(null);
   const [loaded, setLoaded] = useState(false);
-  const [selected, setSelected] = useState(null);
   const [gps, setGps] = useState(null);
+  const [gpsError, setGpsError] = useState(false);
   const router = useRouter();
   const mapInstance = useRef(null);
   const myMarker = useRef(null);
+  const gpsRef = useRef(null);
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -18,15 +19,38 @@ export default function Home() {
     script.onload = () => setLoaded(true);
     document.head.appendChild(script);
 
-    navigator.geolocation.watchPosition(pos => {
-      setGps({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-    });
+    if (!navigator.geolocation) {
+      setGpsError(true);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      pos => {
+        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        gpsRef.current = loc;
+        setGps(loc);
+      },
+      () => setGpsError(true),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+
+    navigator.geolocation.watchPosition(
+      pos => {
+        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        gpsRef.current = loc;
+        setGps(loc);
+        setGpsError(false);
+      },
+      () => setGpsError(true),
+      { enableHighAccuracy: true }
+    );
   }, []);
 
   useEffect(() => {
     if (!loaded || !mapRef.current) return;
+    const center = gpsRef.current || { lat: 35.3005, lng: 139.1325 };
     const map = new window.google.maps.Map(mapRef.current, {
-      center: { lat: 35.3005, lng: 139.1325 },
+      center,
       zoom: 17,
       disableDefaultUI: true,
       styles: [
@@ -37,7 +61,22 @@ export default function Home() {
       ],
     });
     mapInstance.current = map;
-    map.addListener('click', () => setSelected(null));
+
+    if (gpsRef.current) {
+      myMarker.current = new window.google.maps.Marker({
+        position: gpsRef.current,
+        map,
+        icon: {
+          path: window.google.maps.SymbolPath.CIRCLE,
+          scale: 10,
+          fillColor: '#4285F4',
+          fillOpacity: 1,
+          strokeColor: '#fff',
+          strokeWeight: 3,
+        },
+        zIndex: 999,
+      });
+    }
   }, [loaded]);
 
   useEffect(() => {
@@ -58,19 +97,24 @@ export default function Home() {
         },
         zIndex: 999,
       });
-      mapInstance.current.panTo(gps);
     }
   }, [gps]);
 
   const goToMyLocation = () => {
-    if (gps && mapInstance.current) {
-      mapInstance.current.panTo(gps);
+    const loc = gpsRef.current;
+    if (loc && mapInstance.current) {
+      mapInstance.current.panTo(loc);
       mapInstance.current.setZoom(18);
     }
   };
 
   return (
     <div style={{ width: '100vw', height: '100dvh', fontFamily: 'sans-serif', display: 'flex', flexDirection: 'column' }}>
+      {gpsError && (
+        <div style={{ background: '#e24b4a', color: '#fff', padding: '10px 16px', fontSize: 13, fontWeight: 'bold', textAlign: 'center' }}>
+          ⚠️ GPS取得できません。位置情報をONにしてください
+        </div>
+      )}
       <div style={{ flex: 1, position: 'relative' }}>
         <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, background: '#5a9e22', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
