@@ -1,0 +1,22 @@
+﻿{
+  "name": "草成長日記",
+  "short_name": "草日記",
+  "description": "畑の草と植物をAIで記録するアプリ",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fff8ee",
+  "theme_color": "#5a9e22",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
