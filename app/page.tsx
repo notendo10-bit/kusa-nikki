@@ -13,6 +13,13 @@ export default function Home() {
   const gpsRef = useRef(null);
 
   useEffect(() => {
+    const saved = localStorage.getItem('lastGps');
+    if (saved) {
+      const loc = JSON.parse(saved);
+      gpsRef.current = loc;
+      setGps(loc);
+    }
+
     const script = document.createElement('script');
     script.src = 'https://maps.googleapis.com/maps/api/js?key=' + process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     script.async = true;
@@ -29,6 +36,7 @@ export default function Home() {
         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
         gpsRef.current = loc;
         setGps(loc);
+        localStorage.setItem('lastGps', JSON.stringify(loc));
       },
       () => setGpsError(true),
       { enableHighAccuracy: true, timeout: 10000 }
@@ -40,6 +48,7 @@ export default function Home() {
         gpsRef.current = loc;
         setGps(loc);
         setGpsError(false);
+        localStorage.setItem('lastGps', JSON.stringify(loc));
       },
       () => setGpsError(true),
       { enableHighAccuracy: true }
