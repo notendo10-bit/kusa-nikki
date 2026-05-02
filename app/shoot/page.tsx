@@ -1,6 +1,7 @@
 ﻿'use client';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '../../lib/supabase';
 
 export default function Shoot() {
   const videoRef = useRef(null);
@@ -9,6 +10,7 @@ export default function Shoot() {
   const [photo, setPhoto] = useState(null);
   const [gps, setGps] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [result, setResult] = useState(null);
   const router = useRouter();
 
@@ -25,7 +27,7 @@ export default function Shoot() {
     startCamera();
     navigator.geolocation.getCurrentPosition(pos => {
       setGps({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-    });
+    }, null, { enableHighAccuracy: true });
     return () => {
       if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
     };
@@ -64,6 +66,24 @@ export default function Shoot() {
     setLoading(false);
   };
 
+  const saveRecord = async () => {
+    if (!result || !gps) return;
+    setSaving(true);
+    try {
+      const { error } = await supabase.from('records').insert({
+        lat: gps.lat,
+        lng: gps.lng,
+        photo_url: photo,
+        plants: result.plants || [result],
+      });
+      if (error) throw error;
+      router.push('/');
+    } catch (e) {
+      alert('保存に失敗しました');
+    }
+    setSaving(false);
+  };
+
   if (result) return (
     <div style={{ width: '100vw', minHeight: '100vh', background: '#fff8ee', fontFamily: 'sans-serif' }}>
       <div style={{ background: '#5a9e22', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -94,14 +114,14 @@ export default function Shoot() {
           <div style={{ fontSize: 12, color: '#e24b4a', fontWeight: 'bold', marginTop: 4 }}>{plant.memo}</div>
         </div>
       ))}
-      <button onClick={() => router.push('/')} style={{ margin: '16px', padding: 15, background: '#5a9e22', color: '#fff', border: 'none', borderRadius: 20, fontSize: 16, fontWeight: 'bold', cursor: 'pointer', width: 'calc(100% - 32px)', borderBottom: '4px solid #3b6d11' }}>
-        ✓ 保存してマップへ
+      <button onClick={saveRecord} disabled={saving} style={{ margin: '16px', padding: 15, background: saving ? '#888' : '#5a9e22', color: '#fff', border: 'none', borderRadius: 20, fontSize: 16, fontWeight: 'bold', cursor: 'pointer', width: 'calc(100% - 32px)', borderBottom: saving ? 'none' : '4px solid #3b6d11' }}>
+        {saving ? '保存中...' : '✓ 保存してマップへ'}
       </button>
     </div>
   );
 
   return (
-    <div style={{ width: '100vw', height: '100vh', display: 'flex', flexDirection: 'column', background: '#000', fontFamily: 'sans-serif' }}>
+    <div style={{ width: '100vw', height: '100dvh', display: 'flex', flexDirection: 'column', background: '#000', fontFamily: 'sans-serif' }}>
       <div style={{ background: '#5a9e22', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
         <button onClick={() => router.push('/')} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', borderRadius: 10, padding: '5px 12px', color: '#fff', fontWeight: 'bold', cursor: 'pointer' }}>← 戻る</button>
         <span style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>撮影</span>
